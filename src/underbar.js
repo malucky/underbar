@@ -166,6 +166,23 @@ var _ = { };
   //   }, 0); // should be 6
   //
   _.reduce = function(collection, iterator, initialValue) {
+    if (initialValue === undefined) {initialValue = 0;}
+
+    var prevValue = initialValue;
+    _.each(collection, function(item){
+      prevValue = iterator(prevValue,item);
+    });
+    return prevValue;
+    
+    /*
+    //normal implementation
+    var prevValue = initialValue;
+    for (var i = 0; i < collection.length; i++){
+      prevValue = iterator(prevValue, collection[i]);
+    }
+    return prevValue;
+    //end of normal implementation
+    */
   };
 
   // Determine if the array or object contains a given value (using `===`).
@@ -184,6 +201,15 @@ var _ = { };
   // Determine whether all of the elements match a truth test.
   _.every = function(collection, iterator) {
     // TIP: Try re-using reduce() here.
+    if (iterator === undefined){
+      return true;
+    }
+    return _.reduce(collection, function(every, item){
+      if (every === false){
+        return false;
+      }
+      return Boolean(iterator(item));
+    }, true);
   };
 
   // Determine whether any of the elements pass a truth test. If no iterator is
