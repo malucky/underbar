@@ -386,46 +386,43 @@ var _ = { };
   // of that string. For example, _.sortBy(people, 'name') should sort
   // an array of people by their name.
   _.sortBy = function(collection, iterator) {
-    var copyCollection = collection;
-    var newCollection = [];
-    var index;
-    var item;
-    var findMinString = function(collection, propertyName) {
-      var minValue = collection[0][propertyName];
+    //linear sort
+    var findMinIndex = function(arr){
       var minIndex = 0;
-      _.each(collection, function(item, i){
-        if (item[propertyName] < minValue) {
-          minValue = item[propertyName];
-          minIndex = i;
-        };  
-      });
-      return minIndex;
-    };
-    var findMinFunction = function(collection, func) {
-      var minValue = func(collection[0]);
-      var minIndex = 0;
-      _.each(collection, function(item, i){
-        if (func(item) < minValue) {
-          minValue = func(item);
-          minIndex = i;
-        };  
-      });
-      return minIndex;
-    };
-
-    for(var i = 0; i < collection.length; i++){  
       if (typeof iterator === 'string'){
-        index = findMinString(copyCollection, iterator);
+        var min = arr[0][iterator];
+        _.each(arr, function(item, i){
+          if (item[iterator] < min || min === undefined){
+            min = item[iterator];
+            minIndex = i;
+          }
+        });
       }
-      else{
-        index = findMinFunction(copyCollection, iterator);
+      else {
+        var min = iterator(arr[0]);
+        _.each(arr, function(item, i){
+          if (iterator(item) < min || min === undefined) {
+            min = iterator(item);
+            minIndex = i;
+          }
+        });
       }
-        item = copyCollection[index];
-        newCollection.push(item);
-        delete copyCollection(index);
-      }
-    return newCollection;
+      return minIndex;
+    };
+    
+    for (var i = 0; i < collection.length; i++){  
+      _.swap(collection, i, i+findMinIndex(collection.slice(i, collection.length)));
+    }
+    return collection;
   };
+
+  // Swap items in an array.
+  _.swap = function(arr, firstIndex, secondIndex){
+    var temp = arr[firstIndex];
+    arr[firstIndex] = arr[secondIndex];
+    arr[secondIndex] = temp;
+    return arr;
+  }
 
   // Zip together two or more arrays with elements of the same index
   // going together.
