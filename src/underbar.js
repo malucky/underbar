@@ -351,6 +351,20 @@ var _ = { };
 
   // Shuffle an array.
   _.shuffle = function(array) {
+    var shuffledArray = array;
+    var temp;
+    var swap = function(firstIndex, secondIndex){
+      temp = shuffledArray[firstIndex];
+      shuffledArray[firstIndex] = shuffledArray[secondIndex];
+      shuffledArray[secondIndex] = temp;
+    };
+
+    var arrayLength = shuffledArray.length;
+    for (var i = 0; i < arrayLength; i++){
+      swap(i, Math.round(Math.random()*arrayLength));
+    }
+
+    return shuffledArray;
   };
 
 
