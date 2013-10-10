@@ -16,36 +16,32 @@ var _ = { };
   // Return an array of the first n elements of an array. If n is undefined,
   // return just the first element.
   _.first = function(array, n) {    
-    if (Array.isArray(arguments[0])) {
-      if (n === undefined) {
-        return array[0];
-      }
-      else {
-        return array.slice(0,n);
-      }
+    if (n === undefined) {
+      return array[0];
+    }
+    else {
+       return array.slice(0,n);
     }
   };
 
   // Like first, but for the last elements. If n is undefined, return just the
   // last element.
   _.last = function(array, n) { 
-    if (Array.isArray(arguments[0])) {
-      if (n === undefined) {
-        return array[array.length-1];
-      }
-      else if (n > array.length) {
-        return array;
-      }
-      else {
-        return array.slice(array.length-n, array.length);
-      }
+    if (n === undefined) {
+      return array[array.length-1];
+    }
+    else if (n > array.length) {
+      return array;
+    }
+    else {
+      return array.slice(array.length-n, array.length);
     }
   };
 
   // Call iterator(value, key, collection) for each element of collection.
   // Accepts both arrays and objects.
   _.each = function(collection, iterator) {
-    if (Array.isArray(collection)){
+    if (Array.isArray(collection)) {
       for (var i = 0; i < collection.length; i++){
         iterator(collection[i], i, collection);
       }
@@ -64,8 +60,11 @@ var _ = { };
     // implemented for you. Instead of using a standard `for` loop, though,
     // it uses the iteration helper `each`, which you will need to write.
     var index = -1;
-    _.each(array, function(value, i, array){
-      if (array[i] === target && index == -1){
+    _.each(array, function(value, i){
+      if (index != -1){
+        return;
+      }
+      if (array[i] === target){
         index = i;
       }
     })
@@ -74,13 +73,22 @@ var _ = { };
 
   // Return all elements of an array that pass a truth test.
   _.filter = function(collection, iterator) {
-    var passedItems = [];
-    
-    _.each(collection, function(item, i, collection){
-      if (iterator(item)){
-        passedItems.push(item);
-      }
-    })
+    if (Array.isArray(collection)) {
+      var passedItems = [];
+      _.each(collection, function(item){
+        if (iterator(item)){
+          passedItems.push(item);
+        }
+      });
+    }
+    else{
+      var passItems = {};
+      _.each(collection, function(item){
+        if (iterator(item, key)){
+          passedItems[key] = item;
+        }
+      });
+    }    
     return passedItems;
   };
 
@@ -351,7 +359,7 @@ var _ = { };
 
   // Shuffle an array.
   _.shuffle = function(array) {
-    var shuffledArray = array;
+    var shuffledArray = array.slice();
     var temp;
     var swap = function(firstIndex, secondIndex){
       temp = shuffledArray[firstIndex];
@@ -361,9 +369,8 @@ var _ = { };
 
     var arrayLength = shuffledArray.length;
     for (var i = 0; i < arrayLength; i++){
-      swap(i, Math.round(Math.random()*arrayLength));
+      swap(i, Math.floor(Math.random()*arrayLength));
     }
-
     return shuffledArray;
   };
 
@@ -379,6 +386,45 @@ var _ = { };
   // of that string. For example, _.sortBy(people, 'name') should sort
   // an array of people by their name.
   _.sortBy = function(collection, iterator) {
+    var copyCollection = collection;
+    var newCollection = [];
+    var index;
+    var item;
+    var findMinString = function(collection, propertyName) {
+      var minValue = collection[0][propertyName];
+      var minIndex = 0;
+      _.each(collection, function(item, i){
+        if (item[propertyName] < minValue) {
+          minValue = item[propertyName];
+          minIndex = i;
+        };  
+      });
+      return minIndex;
+    };
+    var findMinFunction = function(collection, func) {
+      var minValue = func(collection[0]);
+      var minIndex = 0;
+      _.each(collection, function(item, i){
+        if (func(item) < minValue) {
+          minValue = func(item);
+          minIndex = i;
+        };  
+      });
+      return minIndex;
+    };
+
+    for(var i = 0; i < collection.length; i++){  
+      if (typeof iterator === 'string'){
+        index = findMinString(copyCollection, iterator);
+      }
+      else{
+        index = findMinFunction(copyCollection, iterator);
+      }
+        item = copyCollection[index];
+        newCollection.push(item);
+        delete copyCollection(index);
+      }
+    return newCollection;
   };
 
   // Zip together two or more arrays with elements of the same index
@@ -418,5 +464,4 @@ var _ = { };
   // See the Underbar readme for details.
   _.throttle = function(func, wait) {
   };
-
 }).call(this);
