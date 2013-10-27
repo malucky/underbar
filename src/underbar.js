@@ -391,26 +391,26 @@ var _ = { };
     return collection;
   };
 
-
+  // My own helper function
+  // Takes an array or arguments and return the longest item.length.
+  _.longestArr = function(arr){
+    var longest = arr[0].length;
+    var longestIndex = 0;
+    _.each(arr, function(item, i) {
+      if (item.length > longest) {
+        longest = item.length;
+        findLongest = i;
+      }
+    });
+    return longest;
+  };
   // Zip together two or more arrays with elements of the same index
   // going together.
   //
   // Example:
   // _.zip(['a','b','c','d'], [1,2,3]) returns [['a',1], ['b',2], ['c',3], ['d',undefined]]
   _.zip = function() {
-    var args = arguments;
-    var findLongest = function(){
-      var longest = args[0].length;
-      var longestIndex = 0;
-      _.each(args, function(item, i) {
-        if (item.length > longest) {
-          longest = item.length;
-          findLongest = i;
-        }
-      });
-      return longest;
-    };
-    var longest = findLongest();
+    var longest = _.longestArr(arguments);
     var obj = [];
     for (var i = 0; i < longest; i++) {
       var items = [];
@@ -446,6 +446,32 @@ var _ = { };
   // Takes an arbitrary number of arrays and produces an array that contains
   // every item shared between all the passed-in arrays.
   _.intersection = function() {
+    //plan: 1) find longest arg 2) go through each arr 3) check if the item
+    //has already passed or failed the check, use indexOf on all other arrays
+    var arrList = arguments;
+    var intersectList = [];
+    var failedList = [];
+    //search rest of the arrays for item. Return true if all arrays have it, false otherwise.
+    var searchOtherArrays = function(item) {
+      var i = 0;
+      while (++i < arrList.length) {
+        if (arrList[i].indexOf(item) === -1) {
+          return false;
+        }
+      }
+      return true;
+    }
+    _.each(arrList[0], function(item) {
+      if (intersectList.indexOf(item) === -1 && failedList.indexOf(item) 
+        === -1) {
+        if (searchOtherArrays(item)) { 
+          intersectList.push(item);
+        } else {
+          failedList.push(item);
+        }
+      }
+    });
+    return intersectList;
   };
 
   // Take the difference between one array and a number of other arrays.
