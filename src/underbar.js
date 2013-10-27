@@ -87,22 +87,19 @@ var _ = { };
     // TIP: see if you can re-use _.select() here, without simply
     // copying code in and modifying it
     return _.filter(collection, function(item){
-      return !iterator(item);
+      return !iterator(item); 
     });
   };
 
   // Produce a duplicate-free version of the array.
   _.uniq = function(array) {
     var dupFreeArray = [];
-    return _.filter(array, function(item){
-      if (dupFreeArray.indexOf(item) == -1){
+    _.each(array, function(item){
+      if (dupFreeArray.indexOf(item) === -1) {
         dupFreeArray.push(item);
-        return true;
-      }
-      else{
-        return false;
       }
     });
+    return dupFreeArray;
   };
 
 
