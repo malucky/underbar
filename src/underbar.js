@@ -477,6 +477,23 @@ var _ = { };
   // Take the difference between one array and a number of other arrays.
   // Only the elements present in just the first array will remain.
   _.difference = function(array) {
+    var arrList = arguments;
+    var diffList = [];
+    var findUniqItem = function(item) {
+      var i = 0;
+      while (++i < arrList.length) {
+        if (arrList[i].indexOf(item) !== -1) {
+          return false;
+        }
+      }
+      return true;
+    };
+    _.each(array, function(item) {
+      if (findUniqItem(item)) {
+        diffList.push(item);
+      }
+    });
+    return diffList;
   };
 
 
