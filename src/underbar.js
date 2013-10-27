@@ -46,7 +46,7 @@ var _ = { };
         iterator(collection[i], i, collection);
       }
     }
-    else {
+    else { //object
       for (var i in collection){
         iterator(collection[i], i, collection);
       }
@@ -73,22 +73,12 @@ var _ = { };
 
   // Return all elements of an array that pass a truth test.
   _.filter = function(collection, iterator) {
-    if (Array.isArray(collection)) {
-      var passedItems = [];
-      _.each(collection, function(item){
-        if (iterator(item)){
-          passedItems.push(item);
-        }
-      });
-    }
-    else{
-      var passItems = {};
-      _.each(collection, function(item){
-        if (iterator(item, key)){
-          passedItems[key] = item;
-        }
-      });
-    }    
+    var passedItems = [];
+    _.each(collection, function(item) {
+      if (iterator(item)){
+        passedItems.push(item);
+      }
+    });
     return passedItems;
   };
 
