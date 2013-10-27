@@ -417,8 +417,7 @@ var _ = { };
       for (var j = 0; j < arguments.length; j++) {
         items.push(arguments[j][i]);
       }
-      obj[i] = [];
-      obj[i].push(items);
+      obj.push(items);
     }
     return obj;
   };
