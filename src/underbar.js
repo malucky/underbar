@@ -214,7 +214,7 @@ var _ = { };
         return Boolean(item);
       }
     }
-    //some if opposite of every is false
+    //some: if opposite of every is false
     return _.every(collection, function(item){
       return !iterator(item);
     }) === false;
@@ -241,14 +241,6 @@ var _ = { };
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
   _.extend = function(obj) {
-    /* //simple implementation
-    for (var i = 1; i < arguments.length; i++){
-      for (var key in arguments[i]) {
-        obj[key] = arguments[i][key];
-      }
-    }
-    return obj;
-    //simple implementation end */
     _.each(arguments, function(object){
       for (var key in object){
         obj[key] = object[key];
@@ -327,9 +319,9 @@ var _ = { };
   // call someFunction('a', 'b') after 500ms
   _.delay = function(func, wait) {
     //is there a better way to pass the arguments??
-    var parameters = Array.prototype.slice.call(arguments, 2, arguments.length);
-    window.setTimeout(function(){
-      func.apply(this, parameters);
+    var parameters = Array.prototype.slice.call(arguments, 2);
+    return window.setTimeout(function(){
+      return func.apply(null, parameters);
     }, wait);
   };
 
@@ -338,20 +330,21 @@ var _ = { };
    * ADVANCED COLLECTION OPERATIONS
    * ==============================
    */
+  // Swap items in an array.
+  _.swap = function(arr, firstIndex, secondIndex){
+    var temp = arr[firstIndex];
+    arr[firstIndex] = arr[secondIndex];
+    arr[secondIndex] = temp;
+    return arr;
+  }
 
   // Shuffle an array.
   _.shuffle = function(array) {
-    var shuffledArray = array.slice();
-    var temp;
-    var swap = function(firstIndex, secondIndex){
-      temp = shuffledArray[firstIndex];
-      shuffledArray[firstIndex] = shuffledArray[secondIndex];
-      shuffledArray[secondIndex] = temp;
-    };
-
+    var shuffledArray = array.slice(); //not change original
     var arrayLength = shuffledArray.length;
     for (var i = 0; i < arrayLength; i++){
-      swap(i, Math.floor(Math.random()*arrayLength));
+      //swap each index with another random index
+      _.swap(shuffledArray, i, Math.floor(Math.random()*arrayLength)); 
     }
     return shuffledArray;
   };
@@ -368,7 +361,7 @@ var _ = { };
   // of that string. For example, _.sortBy(people, 'name') should sort
   // an array of people by their name.
   _.sortBy = function(collection, iterator) {
-    //linear sort
+    //define sort function: linear sort
     var findMinIndex = function(arr){
       var minIndex = 0;
       if (typeof iterator === 'string'){
@@ -398,13 +391,6 @@ var _ = { };
     return collection;
   };
 
-  // Swap items in an array.
-  _.swap = function(arr, firstIndex, secondIndex){
-    var temp = arr[firstIndex];
-    arr[firstIndex] = arr[secondIndex];
-    arr[secondIndex] = temp;
-    return arr;
-  }
 
   // Zip together two or more arrays with elements of the same index
   // going together.
@@ -412,6 +398,29 @@ var _ = { };
   // Example:
   // _.zip(['a','b','c','d'], [1,2,3]) returns [['a',1], ['b',2], ['c',3], ['d',undefined]]
   _.zip = function() {
+    var args = arguments;
+    var findLongest = function(){
+      var longest = args[0].length;
+      var longestIndex = 0;
+      _.each(args, function(item, i) {
+        if (item.length > longest) {
+          longest = item.length;
+          findLongest = i;
+        }
+      });
+      return longest;
+    };
+    var longest = findLongest();
+    var obj = [];
+    for (var i = 0; i < longest; i++) {
+      var items = [];
+      for (var j = 0; j < arguments.length; j++) {
+        items.push(arguments[j][i]);
+      }
+      obj[i] = [];
+      obj[i].push(items);
+    }
+    return obj;
   };
 
   // Takes a multidimensional array and converts it to a one-dimensional array.
@@ -419,7 +428,21 @@ var _ = { };
   //
   // Hint: Use Array.isArray to check if something is an array
   _.flatten = function(nestedArray, result) {
+    var flatArray = [];
+    var enterItems = function(arr) {
+      _.each(arr, function(item) {
+        if (Array.isArray(item)) {
+          enterItems(item);
+        }
+        else {
+          flatArray.push(item);
+        }
+      });
+    };
+    enterItems(nestedArray);
+    return flatArray;
   };
+    
 
   // Takes an arbitrary number of arrays and produces an array that contains
   // every item shared between all the passed-in arrays.
