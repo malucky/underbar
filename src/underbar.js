@@ -163,23 +163,14 @@ var _ = { };
   //   }, 0); // should be 6
   //
   _.reduce = function(collection, iterator, initialValue) {
-    if (initialValue === undefined) {initialValue = 0;}
-
+    if (initialValue === undefined) {
+      initialValue = 0;
+    }
     var prevValue = initialValue;
     _.each(collection, function(item){
       prevValue = iterator(prevValue,item);
     });
     return prevValue;
-    
-    /*
-    //normal implementation
-    var prevValue = initialValue;
-    for (var i = 0; i < collection.length; i++){
-      prevValue = iterator(prevValue, collection[i]);
-    }
-    return prevValue;
-    //end of normal implementation
-    */
   };
 
   // Determine if the array or object contains a given value (using `===`).
@@ -202,10 +193,12 @@ var _ = { };
       return true;
     }
     return _.reduce(collection, function(every, item){
-      if (every === false){
+      if (every === false) {
         return false;
       }
-      return Boolean(iterator(item));
+      else {
+        return Boolean(iterator(item));
+      } 
     }, true);
   };
 
