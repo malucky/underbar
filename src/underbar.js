@@ -505,6 +505,8 @@ var _ = { };
   // during a given window of time.
   //
   // See the Underbar readme for details.
+  // Had some trouble with this one. I did not set the lastCallTime inside the
+  // wait function.
   _.throttle = function(func, wait) {
     var args = Array.prototype.slice.call(this, arguments, 2);
     var lastCallTime;
@@ -532,5 +534,3 @@ var _ = { };
     }
   };
 }).call(this);
-//1,1,1,2,2,3
-//
