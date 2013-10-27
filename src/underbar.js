@@ -318,7 +318,6 @@ var _ = { };
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
   _.delay = function(func, wait) {
-    //is there a better way to pass the arguments??
     var parameters = Array.prototype.slice.call(arguments, 2);
     return window.setTimeout(function(){
       return func.apply(null, parameters);
@@ -507,5 +506,31 @@ var _ = { };
   //
   // See the Underbar readme for details.
   _.throttle = function(func, wait) {
+    var args = Array.prototype.slice.call(this, arguments, 2);
+    var lastCallTime;
+    var now;
+    var ans;
+    var waiting = false;
+    var env = this;
+    return function() {
+      now = Date.now();
+      if (lastCallTime === undefined || now - lastCallTime > wait) {
+        lastCallTime = now;
+        ans = func.apply(this, args);
+        return ans;
+      } else if (waiting === false) {
+        waiting = true;
+        window.setTimeout(function(){
+          waiting = false;
+          lastCallTime = Date.now();
+          ans = func.apply(this, args);
+        }, wait-(Date.now()-lastCallTime));
+        return ans;      
+      } else {
+        return ans;
+      }
+    }
   };
 }).call(this);
+//1,1,1,2,2,3
+//
