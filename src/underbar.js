@@ -15,13 +15,8 @@ var _ = { };
 
   // Return an array of the first n elements of an array. If n is undefined,
   // return just the first element.
-  _.first = function(array, n) {    
-    if (n === undefined) {
-      return array[0];
-    }
-    else {
-       return array.slice(0,n);
-    }
+  _.first = function(array, n) {  
+    return n === undefined ? array[0] : array.slice(0,n);  
   };
 
   // Like first, but for the last elements. If n is undefined, return just the
@@ -29,11 +24,9 @@ var _ = { };
   _.last = function(array, n) { 
     if (n === undefined) {
       return array[array.length-1];
-    }
-    else if (n > array.length) {
+    } else if (n > array.length) {
       return array;
-    }
-    else {
+    } else {
       return array.slice(array.length-n, array.length);
     }
   };
@@ -45,8 +38,7 @@ var _ = { };
       for (var i = 0; i < collection.length; i++){
         iterator(collection[i], i, collection);
       }
-    }
-    else { //object
+    } else { //object
       for (var i in collection){
         iterator(collection[i], i, collection);
       }
@@ -67,7 +59,7 @@ var _ = { };
       if (array[i] === target){
         index = i;
       }
-    })
+    });
     return index;
   };
 
@@ -94,6 +86,7 @@ var _ = { };
   // Produce a duplicate-free version of the array.
   _.uniq = function(array) {
     var dupFreeArray = [];
+
     _.each(array, function(item){
       if (dupFreeArray.indexOf(item) === -1) {
         dupFreeArray.push(item);
@@ -163,10 +156,7 @@ var _ = { };
   //   }, 0); // should be 6
   //
   _.reduce = function(collection, iterator, initialValue) {
-    if (initialValue === undefined) {
-      initialValue = 0;
-    }
-    var prevValue = initialValue;
+    var prevValue = initialValue || 0;
     _.each(collection, function(item){
       prevValue = iterator(prevValue,item);
     });
@@ -195,8 +185,7 @@ var _ = { };
     return _.reduce(collection, function(every, item){
       if (every === false) {
         return false;
-      }
-      else {
+      } else {
         return Boolean(iterator(item));
       } 
     }, true);
@@ -242,10 +231,10 @@ var _ = { };
   //   }); // obj1 now contains key1, key2, key3 and bla
   _.extend = function(obj) {
     _.each(arguments, function(object){
-      for (var key in object){
-        obj[key] = object[key];
-      }
-    })
+      _.each(object, function(value, key){
+        obj[key] = value;
+      });
+    });
     return obj;
   };
 
@@ -253,12 +242,14 @@ var _ = { };
   // exists in obj
   _.defaults = function(obj) {
     _.each(arguments, function(object){
-      for (var key in object){
-        if (obj[key] === undefined){
-          obj[key] = object[key];
+
+      _.each(object, function(value, key) {
+        if (obj[key] === undefined) {
+          obj[key] = value;
         }
-      }
-    })
+
+      });
+    });
     return obj;
   };
 
@@ -301,13 +292,11 @@ var _ = { };
   // instead if possible.
   _.memoize = function(func) {
     var prevResults = {};
-    var result;
-
-    return function(someArgument){
-      if (prevResults[someArgument] === undefined) {
-        prevResults[someArgument] = func(someArgument);
-      };
-        return prevResults[someArgument];
+    return function(arg){
+      if (prevResults[arg] === undefined) {
+        prevResults[arg] = func(arg);
+      }
+      return prevResults[arg];
     };
   };
 
@@ -318,9 +307,9 @@ var _ = { };
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
   _.delay = function(func, wait) {
-    var parameters = Array.prototype.slice.call(arguments, 2);
-    return window.setTimeout(function(){
-      return func.apply(null, parameters);
+    var args = Array.prototype.slice.call(arguments, 2);
+    window.setTimeout(function(){
+      func.apply(this, args);
     }, wait);
   };
 
@@ -330,21 +319,23 @@ var _ = { };
    * ==============================
    */
   // Swap items in an array.
+  // helper for _.shuffle
   _.swap = function(arr, firstIndex, secondIndex){
     var temp = arr[firstIndex];
     arr[firstIndex] = arr[secondIndex];
     arr[secondIndex] = temp;
     return arr;
-  }
+  };
 
   // Shuffle an array.
   _.shuffle = function(array) {
-    var shuffledArray = array.slice(); //not change original
-    var arrayLength = shuffledArray.length;
-    for (var i = 0; i < arrayLength; i++){
-      //swap each index with another random index
-      _.swap(shuffledArray, i, Math.floor(Math.random()*arrayLength)); 
-    }
+    var shuffledArray = array.slice(); //not changing original
+    var randomIndex = function() {
+      return Math.floor(Math.random()*shuffledArray.length);
+    };
+    _.each(shuffledArray, function(value, key){
+      shuffledArray = _.swap(shuffledArray, key, randomIndex);
+    });
     return shuffledArray;
   };
 
@@ -361,33 +352,24 @@ var _ = { };
   // an array of people by their name.
   _.sortBy = function(collection, iterator) {
     //define sort function: linear sort
-    var findMinIndex = function(arr){
-      var minIndex = 0;
-      if (typeof iterator === 'string'){
-        var min = arr[0][iterator];
-        _.each(arr, function(item, i){
-          if (item[iterator] < min || min === undefined){
-            min = item[iterator];
-            minIndex = i;
-          }
-        });
-      }
-      else {
-        var min = iterator(arr[0]);
-        _.each(arr, function(item, i){
-          if (iterator(item) < min || min === undefined) {
-            min = iterator(item);
-            minIndex = i;
-          }
-        });
-      }
-      return minIndex;
-    };
-    
-    for (var i = 0; i < collection.length; i++){  
-      _.swap(collection, i, i+findMinIndex(collection.slice(i, collection.length)));
+    if (typeof iterator === 'string') {
+      var property = iterator;
+      iterator = function(arg){
+        return arg[property];
+      };
     }
-    return collection;
+    var comparator = function(a, b) {
+      console.log(a + ": " + iterator(a));
+      if (iterator(a) > iterator(b)) {
+        return 1;
+      } else if (iterator(a) == iterator(b)){
+        return 0;
+      } else {
+        return -1;
+      }
+    };
+    console.log(iterator);
+    return collection.sort(comparator);
   };
 
   // My own helper function
@@ -451,24 +433,29 @@ var _ = { };
     var intersectList = [];
     var failedList = [];
     //search rest of the arrays for item. Return true if all arrays have it, false otherwise.
-    var searchOtherArrays = function(item) {
-      var i = 0;
-      while (++i < arrList.length) {
-        if (arrList[i].indexOf(item) === -1) {
-          return false;
+    var searchArrays = function(item) {
+      return _.reduce(arrList, function(found, arr){
+        if (!found) {
+          return found;
+        } else {
+          return arr.indexOf(item) !== -1;
         }
-      }
-      return true;
-    }
-    _.each(arrList[0], function(item) {
+      }, true);
+    };
+    var search = function(item) {
       if (intersectList.indexOf(item) === -1 && failedList.indexOf(item) 
         === -1) {
-        if (searchOtherArrays(item)) { 
+        if (searchArrays(item)) { 
           intersectList.push(item);
         } else {
           failedList.push(item);
         }
-      }
+      }      
+    };
+    _.each(arrList, function(arr){ //check each array
+      _.each(arr, function(item) { //check each item in an array
+        search(item);
+      });
     });
     return intersectList;
   };
@@ -509,28 +496,26 @@ var _ = { };
   // wait function.
   _.throttle = function(func, wait) {
     var args = Array.prototype.slice.call(this, arguments, 2);
-    var lastCallTime;
+    var lastCallTime = lastCallTime || 0;
     var now;
     var ans;
     var waiting = false;
-    var env = this;
+    var handle;
     return function() {
       now = Date.now();
-      if (lastCallTime === undefined || now - lastCallTime > wait) {
+      if (now - lastCallTime > wait) {
         lastCallTime = now;
         ans = func.apply(this, args);
-        return ans;
       } else if (waiting === false) {
         waiting = true;
-        window.setTimeout(function(){
+        handle = window.setTimeout(function(){
           waiting = false;
           lastCallTime = Date.now();
           ans = func.apply(this, args);
         }, wait-(Date.now()-lastCallTime));
-        return ans;      
-      } else {
-        return ans;
       }
-    }
+      return ans;
+    };
   };
+
 }).call(this);
